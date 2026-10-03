@@ -31,6 +31,7 @@ X = 199
 # 1. Define los mecanismos de sincronización necesarios:
 # sem_A = threading.Semaphore(...)
 # sem_B = threading.Semaphore(...)
+sem_orden_AB = threading.Semaphore(0)
 
 def proceso_A():
     global X
@@ -38,10 +39,12 @@ def proceso_A():
     X = X + 1
     print(f"[Parte 1] Proceso A: X = {X}")
     # TODO: Señalizar al siguiente si corresponde
+    sem_orden_AB.release()
 
 def proceso_B():
     global X
     # TODO: Esperar señal si corresponde
+    sem_orden_AB.acquire()
     X = X // 10
     print(f"[Parte 1] Proceso B: X = {X}")
     # TODO: Señalizar al siguiente si corresponde
@@ -62,27 +65,30 @@ def proceso_B():
 # sem_sig_A = threading.Semaphore(1)  # ¿1 para arrancar?
 # sem_sig_B = threading.Semaphore(0)
 # sem_sig_C = threading.Semaphore(0)
+sem_sig_A = threading.Semaphore(1)
+sem_sig_B = threading.Semaphore(0)
+sem_sig_C = threading.Semaphore(0)
 
 def proceso_emisor_A(rondas=3):
     for i in range(rondas):
-        # sem_sig_A.acquire()
+        sem_sig_A.acquire()
         print(f"[Parte 2] Ronda {i+1} -> 🅰️ Proceso A ejecutando")
         time.sleep(0.1)
-        # sem_sig_B.release()
+        sem_sig_B.release()
 
 def proceso_receptor_B(rondas=3):
     for i in range(rondas):
-        # sem_sig_B.acquire()
+        sem_sig_B.acquire()
         print(f"[Parte 2] Ronda {i+1} -> 🅱️ Proceso B ejecutando")
         time.sleep(0.1)
-        # sem_sig_C.release()
+        sem_sig_C.release()
 
 def proceso_receptor_C(rondas=3):
     for i in range(rondas):
-        # sem_sig_C.acquire()
+        sem_sig_C.acquire()
         print(f"[Parte 2] Ronda {i+1} -> 🅲 Proceso C ejecutando")
         time.sleep(0.1)
-        # sem_sig_A.release()
+        sem_sig_A.release()
 
 
 if __name__ == "__main__":
